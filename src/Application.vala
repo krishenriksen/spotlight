@@ -33,8 +33,9 @@ public class SpotlightWindow : Window {
     private int width = 680;
     private int height = 430;
 
-    private TextBuffer buffer;
-    private Gtk.ToolButton searchButton;
+    private Box search_box;
+    private Entry search_entry;
+    private Image search_app_icon;
 
     private int current_item = 1;
 
@@ -63,40 +64,61 @@ public class SpotlightWindow : Window {
         LightPad.Backend.DesktopEntries.enumerate_apps (this.icons, 24, user_home, out this.apps);
         this.apps.sort ((a, b) => GLib.strcmp (a["name"], b["name"]));
 
-        // search
-		this.toolbar = new Toolbar ();
-		this.toolbar.get_style_context ().add_class("toolbar");
+        // search container
+        this.search_box = new Box (Orientation.HORIZONTAL, 0);
+        search_box.get_style_context().add_class ("search_box");
 
-		this.buffer = new TextBuffer (null);
+        // seach icon
+		var search_icon = new Image();
+		search_icon.get_style_context().add_class ("search_icon");
+		try {
+		    search_icon.set_from_icon_name("edit-find-symbolic", IconSize.LARGE_TOOLBAR);
+		} catch (Error e) {
+		    stderr.printf ("Could not load icon: %s\n", e.message);
+		}
 
-		var search_icon = new Gtk.Image.from_icon_name ("edit-find-symbolic", IconSize.LARGE_TOOLBAR);
-    	this.searchButton = new Gtk.ToolButton(search_icon, "Spotlight Search");
-    	this.searchButton.is_important = true;
+		// search input
+        this.search_entry = new Entry ();
+        this.search_entry.text = "Spotlight Search";
 
-		this.toolbar.add(this.searchButton);
+        // seach app icon
+		this.search_app_icon = new Image();
+		search_app_icon.get_style_context().add_class ("search_app_icon");
+		try {
+		    search_app_icon.set_from_icon_name("edit-find-symbolic", IconSize.LARGE_TOOLBAR);
+		} catch (Error e) {
+		    stderr.printf ("Could not load icon: %s\n", e.message);
+		}
 
+		// add to search box
+        search_box.pack_start(search_icon);
+        search_box.pack_start(this.search_entry);
+        search_box.pack_end(this.search_app_icon);
+
+		// left and right side container
 		this.grid = new Grid();
 		this.grid.get_style_context ().add_class("grid");
 
 		var vbox = new Box (Orientation.VERTICAL, 0);
-		vbox.pack_start (this.toolbar, false, true, 0);
+		vbox.pack_start (search_box, false, true, 0);
 		vbox.pack_start (this.grid, true, true, 0);
 		this.add (vbox);
 
-		this.buffer.changed.connect (() => {
-			this.toolbar.get_style_context ().add_class("searching");
+		this.search_entry.changed.connect (() => {
+			this.search_box.get_style_context ().add_class("searching");
 			this.grid.get_style_context ().add_class("searching");
 
 			this.search();
-		});
+        });
 
         this.draw.connect (this.draw_background);
-        this.focus_out_event.connect ( () => { this.destroy(); return true; } );
+		//this.focus_out_event.connect ( () => { this.destroy(); return true; } );
     }
 
     private bool draw_background (Gtk.Widget widget, Cairo.Context ctx) {
         widget.get_style_context().add_class ("spotlight");
         this.show_all();
+
         return false;
     } 
 
@@ -108,7 +130,7 @@ public class SpotlightWindow : Window {
 
 		this.filtered.clear();
 
-	    var current_text = this.buffer.text.down();
+	    var current_text = this.search_entry.text.down();
 
 	    this.left_box = new Box (Orientation.VERTICAL, 0);
 	    this.left_box.get_style_context().add_class ("left_box");
@@ -141,8 +163,8 @@ public class SpotlightWindow : Window {
         			appsbar.get_style_context().add_class("active");
         		}
 
-				var search_icon = new Gtk.Image.from_icon_name(app["icon"], IconSize.BUTTON);
-		    	var app_button = new Gtk.ToolButton(search_icon, app["name"]);
+				var icon = new Gtk.Image.from_icon_name(app["icon"], IconSize.BUTTON);
+		    	var app_button = new Gtk.ToolButton(icon, app["name"]);
 		    	app_button.is_important = true;
     			app_button.clicked.connect ( () => {
     				this.launch(app);
@@ -154,6 +176,9 @@ public class SpotlightWindow : Window {
 
 				
 	            if (this.filtered.size == 2) {
+    				// add icon to search_entry
+    				search_app_icon.set_from_icon_name(app["icon"], IconSize.LARGE_TOOLBAR);
+
 				    // applications header
 					var applications_header_bar = new Toolbar();
 					applications_header_bar.get_style_context ().add_class("applications_header");
@@ -246,9 +271,9 @@ public class SpotlightWindow : Window {
 	}
 
     private void reset () {
-    	this.searchButton.label = "Spotlight Search";
+    	this.search_entry.text = "Spotlight Search";
 
-		this.toolbar.get_style_context ().remove_class("searching");
+		this.search_box.get_style_context ().remove_class("searching");
 		this.grid.get_style_context ().remove_class("searching");
     }
 
@@ -271,7 +296,7 @@ public class SpotlightWindow : Window {
     public override bool key_press_event (Gdk.EventKey event) {
         switch (Gdk.keyval_name (event.keyval)) {
             case "Escape":
-            	if (this.searchButton.label == "Spotlight Search") {
+            	if (this.search_entry.text == "Spotlight Search") {
             		this.destroy ();
             	}
             	else {
@@ -286,19 +311,6 @@ public class SpotlightWindow : Window {
                 if (this.filtered.size >= 1) {
                 	this.launch(this.filtered.get(this.current_item));
                 }
-                return true;
-
-			case "BackSpace":
-				if (this.searchButton.label.length > 0 && this.searchButton.label != "Spotlight Search") {
-                	this.searchButton.label = this.searchButton.label.slice (0, (int) this.searchButton.label.length - 1);
-                	this.buffer.text = this.searchButton.label;
-				}
-				else {
-					this.reset();
-				}
-
-				this.current_item = 0;
-
                 return true;
 
             case "Up":
@@ -332,12 +344,11 @@ public class SpotlightWindow : Window {
                 break;
 
 			default:
-				if (this.searchButton.label == "Spotlight Search") {
-					this.searchButton.label = "";
+				if (this.search_entry.text == "Spotlight Search") {
+					this.search_entry.text = "";
 				}
 
-                this.searchButton.label = this.searchButton.label + event.str;
-                this.buffer.text = this.searchButton.label;
+                //this.search_entry.text = this.search_entry.text + event.str;
                 break;
         }
 

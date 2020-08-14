@@ -19,7 +19,7 @@
 * Authored by: Kris Henriksen <krishenriksen.work@gmail.com>
 */
 
-.spotlight .toolbar {
+.spotlight .search_box {
 	margin: 1px 1px 0 0;
 	padding: 15px 15px 15px 15px;
 	color: #a0a0a0;
@@ -27,19 +27,21 @@
 	border-radius: 8px;
 }
 
-.spotlight .searching.toolbar {
+.spotlight .searching.search_box {
 	border-top-left-radius: 8px;
 	border-top-right-radius: 8px;
 	border-bottom-left-radius: 0px;
 	border-bottom-right-radius: 0px;
 }
 
-.spotlight .toolbar image {
-	margin: 0 20px 0 0;
+.spotlight .search_box .search_icon {
+	margin: 0 10px 0 0;
 	-gtk-icon-transform: scale(2);
 }
 
-.spotlight .toolbar button {
+.spotlight .search_box entry {
+	min-width: 570px;
+	color: #a0a0a0;
 	background: transparent;
 	border: 0;
 	text-shadow: none;
@@ -47,21 +49,18 @@
 	font-weight: 400;
 }
 
-.spotlight .toolbar label {
-	color: #a0a0a0;
-}
-
-.spotlight .searching.toolbar label {
+.spotlight .searching.search_box entry {
 	color: #353535;
 }
 
-.spotlight .toolbar label:hover {
-	background: transparent;
+.spotlight .search_box .search_app_icon {
+	
 }
 
+/* left and right container */
 .spotlight .grid {
 	border-bottom-left-radius: 8px;
-	border-bottom-right-radius: 8px;	
+	border-bottom-right-radius: 8px;
 	opacity: 0;
 }
 
