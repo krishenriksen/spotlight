@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Spotlight
+Comment=Spotlight for TwisterOS: OSX style app finder.
+Exec=spotlight
+Icon=spotlight
+Terminal=false
+StartupNotify=false
+Type=Application
+NoDisplay=true
