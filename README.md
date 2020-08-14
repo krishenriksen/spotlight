@@ -25,3 +25,7 @@ To build spotlight, use `ninja`:
 To install, use `ninja install`
 
     ninja install
+
+To use, add a keyboard shortcut to `spotlight`
+
+    Open `xfce4-keyboard-settings` and go to Application Shortcuts. Click Add and enter `spotlight` in the Command field. Now click OK and choose your keyboard shortcut.
