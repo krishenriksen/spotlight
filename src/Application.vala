@@ -28,6 +28,7 @@ public class SpotlightWindow : Window {
 
     private Grid grid;
     private Box left_box;
+    private Box right_box;
 
     private int width = 680;
     private int height = 430;
@@ -89,6 +90,12 @@ public class SpotlightWindow : Window {
 		vbox.pack_start (this.grid, true, true, 0);
 		this.add (vbox);
 
+	    this.left_box = new Box (Orientation.VERTICAL, 0);
+	    this.left_box.get_style_context().add_class ("left_box");
+
+	    this.right_box = new Box (Orientation.VERTICAL, 0);
+	    this.right_box.get_style_context().add_class ("right_box");		
+
 		this.search_entry.changed.connect (() => {
 			this.search_box.get_style_context ().add_class("searching");
 			this.grid.get_style_context ().add_class("searching");
@@ -97,7 +104,7 @@ public class SpotlightWindow : Window {
         });
 
         this.draw.connect (this.draw_background);
-		this.focus_out_event.connect ( () => { this.destroy(); return true; } );
+		//this.focus_out_event.connect ( () => { this.destroy(); return true; } );
     }
 
     private bool draw_background (Gtk.Widget widget, Cairo.Context ctx) {
@@ -108,20 +115,27 @@ public class SpotlightWindow : Window {
     } 
 
 	private void search() {
+		// clear left box
+		GLib.List<weak Gtk.Widget> left_children = this.left_box.get_children ();
+		foreach (Gtk.Widget left_element in left_children) {
+			this.left_box.remove(left_element);
+		}
+
+		// clear right box
+		GLib.List<weak Gtk.Widget> right_children = this.right_box.get_children ();
+		foreach (Gtk.Widget right_element in right_children) {
+			this.right_box.remove(right_element);
+		}
+
+		// clear grid
 		GLib.List<weak Gtk.Widget> children = this.grid.get_children ();
 		foreach (Gtk.Widget element in children) {
 			this.grid.remove(element);
-		}
+		}		
 
 		this.filtered.clear();
 
 	    var current_text = this.search_entry.text.down();
-
-	    this.left_box = new Box (Orientation.VERTICAL, 0);
-	    this.left_box.get_style_context().add_class ("left_box");
-
-	    var right_box = new Box (Orientation.VERTICAL, 0);
-	    right_box.get_style_context().add_class ("right_box");
 
 	    // top hit header
 		var top_hit_label = new Label("TOP HIT");
@@ -174,9 +188,14 @@ public class SpotlightWindow : Window {
 					this.filtered.add(null);
 
 	            	// right side
-	            	this.rightSide(right_box, app);
+	            	this.rightSide(app);
 				}
 	        }
+	    }
+
+	    if (this.filtered.size < 3) {
+	    	// do calculation
+			this.calculate(this.search_entry.text);
 	    }
 
 	    // show all in finder
@@ -190,7 +209,7 @@ public class SpotlightWindow : Window {
             try {
                 GLib.AppInfo.create_from_commandline ("catfish --path=/ --start " + current_text, null, GLib.AppInfoCreateFlags.NONE).launch (null, null);
             } catch (GLib.Error e) {
-                warning ("Error! Load application: " + e.message);
+            	warning ("Could not load application: %s", e.message);
             }
 		});
 		show_in_finder.add(show_in_finder_button);
@@ -204,18 +223,18 @@ public class SpotlightWindow : Window {
 		scroll.add(this.left_box);
 
 	    this.grid.add(scroll);
-	    this.grid.add(right_box);
+	    this.grid.add(this.right_box);
 
 	    this.show_all();
 	}
 
-	private void rightSide(Box right_box, Gee.HashMap<string, string> app) {
+	private void rightSide(Gee.HashMap<string, string> app) {
 		var app_image = new Image();
 		app_image.get_style_context().add_class ("app_image");
 		try {
 		    app_image.set_from_icon_name(app["icon"], IconSize.DIALOG);
 		} catch (Error e) {
-		    stderr.printf ("Could not load icon: %s\n", e.message);
+			warning ("Could not load icon: %s", e.message);
 		}
 
 		var app_name = new Gtk.Label(app["name"]);
@@ -233,10 +252,16 @@ public class SpotlightWindow : Window {
         app_command.get_style_context().add_class ("app_command");
         app_command.text = app["command"];
 
-		right_box.add(app_image);
-		right_box.add(app_name);
-		right_box.add(app_description);
-		right_box.add(app_command);
+        // clear right box
+		GLib.List<weak Gtk.Widget> children = this.right_box.get_children ();
+		foreach (Gtk.Widget element in children) {
+			this.right_box.remove(element);
+		}
+
+		this.right_box.add(app_image);
+		this.right_box.add(app_name);
+		this.right_box.add(app_description);
+		this.right_box.add(app_command);
 	}
 
 	private void launch(Gee.HashMap<string, string> app) {
@@ -247,7 +272,7 @@ public class SpotlightWindow : Window {
                 new GLib.DesktopAppInfo.from_filename (app["desktop_file"]).launch (null, null);
             }
         } catch (GLib.Error e) {
-            warning ("Error! Load application: " + e.message);
+            warning ("Could not load application: %s", e.message);
         }
 
 		this.destroy();
@@ -267,10 +292,7 @@ public class SpotlightWindow : Window {
 				search_app_icon.set_from_icon_name(app["icon"], IconSize.DND);
 
 				// add right side description
-	    		var right_box = new Box (Orientation.VERTICAL, 0);
-	    		right_box.get_style_context().add_class ("right_box");
-
-				this.rightSide(right_box, app);
+				this.rightSide(app);
 
 				int grid_i = 0;
 				GLib.List<weak Gtk.Widget> grid_children = this.grid.get_children();
@@ -282,7 +304,7 @@ public class SpotlightWindow : Window {
 					grid_i++;
 				}
 
-				this.grid.add(right_box);
+				this.grid.add(this.right_box);
 			}
 
 			i++;
@@ -298,7 +320,54 @@ public class SpotlightWindow : Window {
     	this.current_item = 1;
 
     	this.search_entry.text = "";
-    }    
+    }
+
+    private void calculate(string calc) {
+		var eval = new PantheonCalculator.Core.Evaluation ();
+
+		var output = "";
+
+		try {
+            output = eval.evaluate (this.search_entry.text, 0);
+        } catch (PantheonCalculator.Core.OUT_ERROR e) {
+        	warning ("Could not calculate: %s", e.message);
+        }
+
+        if (output.length > 0) {
+	        // left section
+			var appsbar = new Toolbar ();
+			appsbar.get_style_context ().add_class("appsbar");
+			appsbar.get_style_context().add_class("active");
+
+			var icon = new Gtk.Image.from_icon_name("calculator", IconSize.MENU);
+	    	var app_button = new Gtk.ToolButton(icon, output);
+	    	app_button.is_important = true;
+
+			appsbar.add(app_button);
+
+			this.left_box.add(appsbar);
+
+			var scroll = new ScrolledWindow (null, null);
+			scroll.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
+			scroll.get_style_context ().add_class("scroll");
+			scroll.add(this.left_box);
+
+		    this.grid.add(scroll);
+		    this.grid.add(this.right_box);
+
+		    this.show_all();
+
+			// add right side
+	        var app_to_add = new Gee.HashMap<string, string> ();
+	        app_to_add["name"] = output;
+	        app_to_add["description"] = this.search_entry.text;
+	        app_to_add["command"] = "";
+	        app_to_add["desktop_file"] = "";
+	        app_to_add["icon"] = "calculator";
+
+			this.rightSide(app_to_add);
+        }
+    }
 
     // Keyboard shortcuts
     public override bool key_press_event (Gdk.EventKey event) {
@@ -397,7 +466,7 @@ static int main (string[] args) {
         css_provider.load_from_path (css_file);
         Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
     } catch (GLib.Error e) {
-        warning ("Could not load CSS file: %s",css_file);
+        warning ("Could not load CSS file: %s", css_file);
     }
 
     app.activate.connect( () => {

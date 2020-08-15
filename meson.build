@@ -1,7 +1,7 @@
 project(
     'spotlight',
     'vala', 'c',
-    version: '0.0.1',
+    version: '0.0.2',
     meson_version: '>=0.45.0'
 )
 
@@ -36,11 +36,17 @@ SpotlightValaArgs = [
     '--target-glib=2.38',
 ]
 
+# Calculator Widget
+add_global_arguments('-DGETTEXT_PACKAGE=@0@'.format(meson.project_name()), language:'c')
+
 # Create a new executable, list the files we want to compile, list the dependencies we need, and install
 executable(
     meson.project_name(),
     'src/Application.vala',
     'src/DesktopEntries.vala',
+    'src/Widgets/Calculator/Core/Evaluation.vala',
+    'src/Widgets/Calculator/Core/Scanner.vala',
+    'src/Widgets/Calculator/Core/Token.vala',
     dependencies: [
         dependency('gio-unix-2.0', version: '>=2.56.0'),
         dependency('glib-2.0', version: '>=2.56.0'),
@@ -49,7 +55,8 @@ executable(
         dependency('cairo', version: '>=1.15.0'),
         dependency('pango', version: '>=1.40.0'),
         dependency('libgnome-menu-3.0', version: '>=3.13.0'),
-	dependency('gee-0.8', version: '>=0.20.0'),
+		dependency('gee-0.8', version: '>=0.20.0'),
+		meson.get_compiler('vala').find_library('posix'),
         # Similar to add options "-X -lm" in cmake to use Math.pow()
         meson.get_compiler('c').find_library('m', required: false)
     ],
