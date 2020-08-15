@@ -147,7 +147,7 @@ public class SpotlightWindow : Window {
         			appsbar.get_style_context().add_class("active");
         		}
 
-				var icon = new Gtk.Image.from_icon_name(app["icon"], IconSize.BUTTON);
+				var icon = new Gtk.Image.from_icon_name(app["icon"], IconSize.MENU);
 		    	var app_button = new Gtk.ToolButton(icon, app["name"]);
 		    	app_button.is_important = true;
     			app_button.clicked.connect ( () => {
@@ -161,7 +161,7 @@ public class SpotlightWindow : Window {
 				
 	            if (this.filtered.size == 2) {
     				// add app icon to search_entry
-    				this.search_app_icon.set_from_icon_name(app["icon"], IconSize.LARGE_TOOLBAR);
+    				this.search_app_icon.set_from_icon_name(app["icon"], IconSize.DND);
 
 				    // applications header
 					var applications_header_label = new Label("APPLICATIONS");
@@ -264,7 +264,7 @@ public class SpotlightWindow : Window {
 				element.get_style_context().add_class("active");
 
     			// add app icon to search_entry
-				search_app_icon.set_from_icon_name(app["icon"], IconSize.LARGE_TOOLBAR);
+				search_app_icon.set_from_icon_name(app["icon"], IconSize.DND);
 
 				// add right side description
 	    		var right_box = new Box (Orientation.VERTICAL, 0);
@@ -290,7 +290,7 @@ public class SpotlightWindow : Window {
     }
 
     private void reset () {
-    	this.search_app_icon.set_from_icon_name(null, IconSize.LARGE_TOOLBAR);
+    	this.search_app_icon.set_from_icon_name(null, IconSize.DND);
 
 		this.search_box.get_style_context ().remove_class("searching");
 		this.grid.get_style_context ().remove_class("searching");

@@ -21,7 +21,7 @@
 
 .spotlight .search_box {
 	margin: 1px 1px 0 0;
-	padding: 15px 15px 15px 15px;
+	padding: 15px;
 	color: #a0a0a0;
 	background: rgba(240, 240, 240, 1);
 	border-radius: 8px;
@@ -45,8 +45,11 @@
 }
 
 .spotlight .search_box entry image {
+	min-width: 32px;
+	min-height: 32px;
 	margin: 0 10px 0 0;
 	-gtk-icon-transform: scale(2);
+	-gtk-icon-style: symbolic;
 }
 
 .spotlight .searching.search_box entry {
@@ -54,7 +57,7 @@
 }
 
 .spotlight .search_box .search_app_icon {
-	
+	-gtk-icon-style: symbolic;
 }
 
 /* left and right container */
@@ -137,6 +140,7 @@
 .spotlight .grid .right_box .app_image {
 	margin: 80px 0 0 0;
 	-gtk-icon-transform: scale(2);
+	-gtk-icon-style: symbolic;
 }
 
 .spotlight .grid .right_box .app_name {
