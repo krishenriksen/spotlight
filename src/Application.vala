@@ -26,7 +26,6 @@ public class SpotlightWindow : Window {
 
     private static string user_home = GLib.Environment.get_variable ("HOME");
 
-    private Toolbar toolbar;
     private Grid grid;
     private Box left_box;
 
@@ -68,30 +67,16 @@ public class SpotlightWindow : Window {
         this.search_box = new Box (Orientation.HORIZONTAL, 0);
         search_box.get_style_context().add_class ("search_box");
 
-        // seach icon
-		var search_icon = new Image();
-		search_icon.get_style_context().add_class ("search_icon");
-		try {
-		    search_icon.set_from_icon_name("edit-find-symbolic", IconSize.LARGE_TOOLBAR);
-		} catch (Error e) {
-		    stderr.printf ("Could not load icon: %s\n", e.message);
-		}
-
 		// search input
         this.search_entry = new Entry ();
-        this.search_entry.text = "Spotlight Search";
+        search_entry.set_property("can-focus", false);
+        this.search_entry.set_placeholder_text("Spotlight Search");
+		this.search_entry.set_icon_from_icon_name (Gtk.EntryIconPosition.PRIMARY, "edit-find-symbolic");
 
         // seach app icon
 		this.search_app_icon = new Image();
-		search_app_icon.get_style_context().add_class ("search_app_icon");
-		try {
-		    search_app_icon.set_from_icon_name("edit-find-symbolic", IconSize.LARGE_TOOLBAR);
-		} catch (Error e) {
-		    stderr.printf ("Could not load icon: %s\n", e.message);
-		}
 
 		// add to search box
-        search_box.pack_start(search_icon);
         search_box.pack_start(this.search_entry);
         search_box.pack_end(this.search_app_icon);
 
@@ -112,7 +97,7 @@ public class SpotlightWindow : Window {
         });
 
         this.draw.connect (this.draw_background);
-		//this.focus_out_event.connect ( () => { this.destroy(); return true; } );
+		this.focus_out_event.connect ( () => { this.destroy(); return true; } );
     }
 
     private bool draw_background (Gtk.Widget widget, Cairo.Context ctx) {
@@ -139,13 +124,12 @@ public class SpotlightWindow : Window {
 	    right_box.get_style_context().add_class ("right_box");
 
 	    // top hit header
-		var top_hit_bar = new Toolbar();
-		top_hit_bar.get_style_context ().add_class("top_hit");
-    	var top_hit_button = new Gtk.ToolButton(null, "TOP HIT");
-    	top_hit_button.is_important = true;
-		top_hit_bar.add(top_hit_button);
+		var top_hit_label = new Label("TOP HIT");
+		top_hit_label.set_property("can-focus", false);
+		top_hit_label.set_xalign(0);
+		top_hit_label.get_style_context ().add_class("top_hit");
 
-		this.left_box.add(top_hit_bar);
+		this.left_box.add(top_hit_label);
 
 		this.filtered.add(null);
 
@@ -176,50 +160,21 @@ public class SpotlightWindow : Window {
 
 				
 	            if (this.filtered.size == 2) {
-    				// add icon to search_entry
-    				search_app_icon.set_from_icon_name(app["icon"], IconSize.LARGE_TOOLBAR);
+    				// add app icon to search_entry
+    				this.search_app_icon.set_from_icon_name(app["icon"], IconSize.LARGE_TOOLBAR);
 
 				    // applications header
-					var applications_header_bar = new Toolbar();
-					applications_header_bar.get_style_context ().add_class("applications_header");
-			    	var applications_header_button = new Gtk.ToolButton(null, "APPLICATIONS");
-			    	applications_header_button.is_important = true;
-					applications_header_bar.add(applications_header_button);
+					var applications_header_label = new Label("APPLICATIONS");
+					applications_header_label.set_property("can-focus", false);
+					applications_header_label.set_xalign(0);
+					applications_header_label.get_style_context ().add_class("applications_header");
 
-					this.left_box.add(applications_header_bar);
+					this.left_box.add(applications_header_label);
 
 					this.filtered.add(null);
 
 	            	// right side
-					var app_image = new Image();
-					app_image.get_style_context().add_class ("app_image");
-					try {
-					    app_image.set_from_icon_name(app["icon"], IconSize.DIALOG);
-					} catch (Error e) {
-					    stderr.printf ("Could not load icon: %s\n", e.message);
-					}
-
-					var app_name = new Gtk.Label(app["name"]);
-					app_name.get_style_context().add_class ("app_name");
-
-					var app_description_buffer = new Gtk.TextBuffer (null); //stores text to be displayed
-					app_description_buffer.text = app["description"];
-					var app_description = new Gtk.TextView.with_buffer (app_description_buffer); //displays TextBuffer
-					app_description.set_wrap_mode (Gtk.WrapMode.WORD); //sets line wrapping
-					app_description.set_property("editable", false);
-					app_description.get_style_context().add_class ("app_description");
-
-					var app_command_buffer = new Gtk.TextBuffer (null); //stores text to be displayed
-					app_command_buffer.text = app["command"];
-					var app_command = new Gtk.TextView.with_buffer (app_command_buffer); //displays TextBuffer
-					app_command.set_wrap_mode (Gtk.WrapMode.WORD); //sets line wrapping
-					app_command.set_property("editable", false);
-					app_command.get_style_context().add_class ("app_command");
-
-					right_box.add(app_image);
-					right_box.add(app_name);
-					right_box.add(app_description);
-					right_box.add(app_command);
+	            	this.rightSide(right_box, app);
 				}
 	        }
 	    }
@@ -254,6 +209,36 @@ public class SpotlightWindow : Window {
 	    this.show_all();
 	}
 
+	private void rightSide(Box right_box, Gee.HashMap<string, string> app) {
+		var app_image = new Image();
+		app_image.get_style_context().add_class ("app_image");
+		try {
+		    app_image.set_from_icon_name(app["icon"], IconSize.DIALOG);
+		} catch (Error e) {
+		    stderr.printf ("Could not load icon: %s\n", e.message);
+		}
+
+		var app_name = new Gtk.Label(app["name"]);
+		app_name.get_style_context().add_class ("app_name");
+
+        var app_description = new Entry ();
+        app_description.set_editable(false);
+        app_description.set_property("can-focus", false);
+        app_description.get_style_context().add_class ("app_description");
+        app_description.text = app["description"];
+
+        var app_command = new Entry ();
+        app_command.set_editable(false);
+        app_command.set_property("can-focus", false);
+        app_command.get_style_context().add_class ("app_command");
+        app_command.text = app["command"];
+
+		right_box.add(app_image);
+		right_box.add(app_name);
+		right_box.add(app_description);
+		right_box.add(app_command);
+	}
+
 	private void launch(Gee.HashMap<string, string> app) {
         try {
             if (app["terminal"] == "true") {
@@ -261,8 +246,6 @@ public class SpotlightWindow : Window {
             } else {
                 new GLib.DesktopAppInfo.from_filename (app["desktop_file"]).launch (null, null);
             }
-
-            this.destroy ();
         } catch (GLib.Error e) {
             warning ("Error! Load application: " + e.message);
         }
@@ -270,14 +253,7 @@ public class SpotlightWindow : Window {
 		this.destroy();
 	}
 
-    private void reset () {
-    	this.search_entry.text = "Spotlight Search";
-
-		this.search_box.get_style_context ().remove_class("searching");
-		this.grid.get_style_context ().remove_class("searching");
-    }
-
-    private void setActive() {
+    private void setActive(Gee.HashMap<string, string> app) {
     	int i = 0;
 
 		GLib.List<weak Gtk.Widget> children = this.left_box.get_children ();
@@ -286,70 +262,115 @@ public class SpotlightWindow : Window {
 
 			if (i == this.current_item) {
 				element.get_style_context().add_class("active");
+
+    			// add app icon to search_entry
+				search_app_icon.set_from_icon_name(app["icon"], IconSize.LARGE_TOOLBAR);
+
+				// add right side description
+	    		var right_box = new Box (Orientation.VERTICAL, 0);
+	    		right_box.get_style_context().add_class ("right_box");
+
+				this.rightSide(right_box, app);
+
+				int grid_i = 0;
+				GLib.List<weak Gtk.Widget> grid_children = this.grid.get_children();
+				foreach (Gtk.Widget grid_element in grid_children) {
+					if (grid_i == 0) {
+						this.grid.remove(grid_element);
+					}
+
+					grid_i++;
+				}
+
+				this.grid.add(right_box);
 			}
 
 			i++;
 		}
     }
 
+    private void reset () {
+    	this.search_app_icon.set_from_icon_name(null, IconSize.LARGE_TOOLBAR);
+
+		this.search_box.get_style_context ().remove_class("searching");
+		this.grid.get_style_context ().remove_class("searching");
+
+    	this.current_item = 1;
+
+    	this.search_entry.text = "";
+    }    
+
     // Keyboard shortcuts
     public override bool key_press_event (Gdk.EventKey event) {
         switch (Gdk.keyval_name (event.keyval)) {
-            case "Escape":
-            	if (this.search_entry.text == "Spotlight Search") {
+            case "Escape": {
+            	if (this.search_entry.text.length == 0) {
             		this.destroy ();
             	}
             	else {
             		this.reset();
             	}
 
-            	this.current_item = 0;
-
                 return true;
+            }
 
-            case "Return":
+            case "Return": {
                 if (this.filtered.size >= 1) {
                 	this.launch(this.filtered.get(this.current_item));
                 }
-                return true;
 
-            case "Up":
-            	if (this.current_item >= 1) {
+                return true;
+            }
+
+            case "Up": {
+            	if (this.current_item >= 2) {
             		this.current_item -= 1;
 
             		if (this.filtered.get(this.current_item) == null) {
-						this.current_item -= 1;
-
-						if (this.current_item < 0) {
-							this.current_item = 1;
-						}
+						this.current_item -= 1;            			
             		}
+
+            		this.setActive(this.filtered.get(this.current_item));
+            		return true;
             	}
 
-            	this.setActive();
+            	break;
+            }
 
-                break;
-
-            case "Down":
+            case "Down": {
             	if (this.current_item < (this.filtered.size - 1)) {
             		this.current_item += 1;
 
             		if (this.filtered.get(this.current_item) == null) {
-						this.current_item += 1;            			
+            			if ((this.current_item + 1) < this.filtered.size) {
+            				this.current_item += 1;
+            			}
             		}
+
+            		this.setActive(this.filtered.get(this.current_item));
+            		return true;
             	}
 
-            	this.setActive();
-
                 break;
+            }
 
-			default:
-				if (this.search_entry.text == "Spotlight Search") {
-					this.search_entry.text = "";
+			case "BackSpace": {
+				if (this.search_entry.text.length > 0) {
+                	this.search_entry.text = this.search_entry.text.slice (0, (int) this.search_entry.text.length - 1);
+				}
+				else {
+					this.reset();
 				}
 
-                //this.search_entry.text = this.search_entry.text + event.str;
+				this.current_item = 1;
+
+                return true;
+            }
+
+			default: {
+				this.search_entry.text = this.search_entry.text + event.str;
                 break;
+            }
         }
 
         base.key_press_event (event);
