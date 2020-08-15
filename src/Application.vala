@@ -131,7 +131,7 @@ public class SpotlightWindow : Window {
 		GLib.List<weak Gtk.Widget> children = this.grid.get_children ();
 		foreach (Gtk.Widget element in children) {
 			this.grid.remove(element);
-		}		
+		}
 
 		this.filtered.clear();
 
@@ -197,35 +197,36 @@ public class SpotlightWindow : Window {
 	    	// do calculation
 			this.calculate(this.search_entry.text);
 	    }
+	    else {
+		    // show all in finder
+			var show_in_finder = new Toolbar ();
+			show_in_finder.get_style_context ().add_class("appsbar");
+			show_in_finder.get_style_context ().add_class("show_in_finder");
+			var finder_icon = new Gtk.Image.from_icon_name("file-manager", IconSize.BUTTON);
+			var show_in_finder_button = new Gtk.ToolButton(finder_icon, "Show all in Finder...");
+			show_in_finder_button.is_important = true;
+			show_in_finder_button.clicked.connect ( () => {
+	            try {
+	                GLib.AppInfo.create_from_commandline ("catfish --path=/ --start " + current_text, null, GLib.AppInfoCreateFlags.NONE).launch (null, null);
+	            } catch (GLib.Error e) {
+	            	warning ("Could not load application: %s", e.message);
+	            }
+			});
+			show_in_finder.add(show_in_finder_button);
 
-	    // show all in finder
-		var show_in_finder = new Toolbar ();
-		show_in_finder.get_style_context ().add_class("appsbar");
-		show_in_finder.get_style_context ().add_class("show_in_finder");
-		var finder_icon = new Gtk.Image.from_icon_name("file-manager", IconSize.BUTTON);
-		var show_in_finder_button = new Gtk.ToolButton(finder_icon, "Show all in Finder...");
-		show_in_finder_button.is_important = true;
-		show_in_finder_button.clicked.connect ( () => {
-            try {
-                GLib.AppInfo.create_from_commandline ("catfish --path=/ --start " + current_text, null, GLib.AppInfoCreateFlags.NONE).launch (null, null);
-            } catch (GLib.Error e) {
-            	warning ("Could not load application: %s", e.message);
-            }
-		});
-		show_in_finder.add(show_in_finder_button);
-
-		this.left_box.add(show_in_finder);
+			this.left_box.add(show_in_finder);
 
 
-		var scroll = new ScrolledWindow (null, null);
-		scroll.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
-		scroll.get_style_context ().add_class("scroll");
-		scroll.add(this.left_box);
+			var scroll = new ScrolledWindow (null, null);
+			scroll.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
+			scroll.get_style_context ().add_class("scroll");
+			scroll.add(this.left_box);
 
-	    this.grid.add(scroll);
-	    this.grid.add(this.right_box);
+		    this.grid.add(scroll);
+		    this.grid.add(this.right_box);
 
-	    this.show_all();
+		    this.show_all();
+	    }
 	}
 
 	private void rightSide(Gee.HashMap<string, string> app) {
@@ -334,6 +335,8 @@ public class SpotlightWindow : Window {
         }
 
         if (output.length > 0) {
+        	this.search_app_icon.set_from_icon_name("calculator", IconSize.DND);
+
 	        // left section
 			var appsbar = new Toolbar ();
 			appsbar.get_style_context ().add_class("appsbar");
