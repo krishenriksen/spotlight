@@ -70,7 +70,7 @@ public class SpotlightWindow : Window {
 
 		// search input
         this.search_entry = new Entry ();
-        search_entry.set_property("can-focus", false);
+        //search_entry.set_property("can-focus", false);
         this.search_entry.set_placeholder_text("Spotlight Search");
 		this.search_entry.set_icon_from_icon_name (Gtk.EntryIconPosition.PRIMARY, "edit-find-symbolic");
 
@@ -148,8 +148,7 @@ public class SpotlightWindow : Window {
 		this.filtered.add(null);
 
 	    foreach (Gee.HashMap<string, string> app in this.apps) {
-	        if ((app["name"] != null && current_text in app["name"].down ()) ||
-	            (app["command"] != null && current_text in app["command"].down ())) {
+	        if ((app["name"] != null && current_text in app["name"].down ())) {
 
 	            this.filtered.add(app);
 
@@ -427,6 +426,7 @@ public class SpotlightWindow : Window {
             }
 
 			case "BackSpace": {
+				/*
 				if (this.search_entry.text.length > 0) {
                 	this.search_entry.text = this.search_entry.text.slice (0, (int) this.search_entry.text.length - 1);
 				}
@@ -434,13 +434,21 @@ public class SpotlightWindow : Window {
 					this.reset();
 				}
 
-				this.current_item = 1;
-
                 return true;
+                */
+
+                this.current_item = 1;
+                break;
             }
 
 			default: {
-				this.search_entry.text = this.search_entry.text + event.str;
+				//this.search_entry.text = this.search_entry.text + event.str;
+
+				if (this.search_entry.text.length == 0) {
+					this.search_entry.grab_focus();
+				}
+
+				this.current_item = 1;
                 break;
             }
         }
