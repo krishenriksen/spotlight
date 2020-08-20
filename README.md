@@ -6,10 +6,10 @@ Spotlight for TwisterOS: OSX style app finder.
 ## Building, Testing, and Installation
 
 You'll need the following dependencies:
-* meson >= 0.48.2
-* libgtk-3-dev
-* cairo >=1.15.0
-* valac
+
+```
+$ sudo apt install meson ninja-build libgee-0.8-dev libgnome-menu-3-dev cdbs valac libvala-*-dev libglib2.0-dev libwnck-3-dev libgtk-3-dev python3 python3-wheel python3-setuptools
+```
 
 Run `meson build` to configure the build environment:
 
