@@ -267,7 +267,7 @@ public class SpotlightWindow : Window {
 	private void launch(Gee.HashMap<string, string> app) {
         try {
             if (app["terminal"] == "true") {
-            	GLib.AppInfo.create_from_commandline (app["command"], null, GLib.AppInfoCreateFlags.NONE).launch (null, null);
+				GLib.AppInfo.create_from_commandline(app["command"], null, GLib.AppInfoCreateFlags.NEEDS_TERMINAL).launch (null, null);
             } else {
                 new GLib.DesktopAppInfo.from_filename (app["desktop_file"]).launch (null, null);
             }
