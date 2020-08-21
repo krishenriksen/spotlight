@@ -104,7 +104,7 @@ public class SpotlightWindow : Window {
         });
 
         this.draw.connect (this.draw_background);
-		//this.focus_out_event.connect ( () => { this.destroy(); return true; } );
+		this.focus_out_event.connect ( () => { this.destroy(); return true; } );
     }
 
     private bool draw_background (Gtk.Widget widget, Cairo.Context ctx) {
