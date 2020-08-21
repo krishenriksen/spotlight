@@ -73,3 +73,9 @@ install_data(
     join_paths('data', 'spotlight.css'),
     install_dir: join_paths(datadir, PROJECT_NAME)
 )
+
+# Install CSS file
+install_data(
+    join_paths('data', 'spotlight_dark.css'),
+    install_dir: join_paths(datadir, PROJECT_NAME)
+)

@@ -104,7 +104,7 @@ public class SpotlightWindow : Window {
         });
 
         this.draw.connect (this.draw_background);
-		this.focus_out_event.connect ( () => { this.destroy(); return true; } );
+		//this.focus_out_event.connect ( () => { this.destroy(); return true; } );
     }
 
     private bool draw_background (Gtk.Widget widget, Cairo.Context ctx) {
@@ -468,9 +468,12 @@ static int main (string[] args) {
     Gtk.init (ref args);
     Gtk.Application app = new Gtk.Application ("dk.krishenriksen.spotlight", GLib.ApplicationFlags.FLAGS_NONE);
 
+    // check for light or dark theme
+    File file = File.new_for_path (GLib.Environment.get_variable ("HOME") + "/.iraspbian-dark.twid");
+
     string css_file = Config.PACKAGE_SHAREDIR +
         "/" + Config.PROJECT_NAME +
-        "/" + "spotlight.css";
+        "/" + (file.query_exists() ? "spotlight_dark.css" : "spotlight.css");
     var css_provider = new Gtk.CssProvider ();
 
     try {
