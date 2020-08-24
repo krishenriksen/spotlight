@@ -161,7 +161,7 @@ public class SpotlightWindow : Window {
         		}
 
 				var icon = new Gtk.Image.from_icon_name(app["icon"], IconSize.MENU);
-		    	var app_button = new Gtk.ToolButton(icon, app["name"] + ".app");
+		    	var app_button = new Gtk.ToolButton(icon, app["name"]);
 		    	app_button.is_important = true;
     			app_button.clicked.connect ( () => {
     				this.launch(app);
@@ -237,7 +237,7 @@ public class SpotlightWindow : Window {
 			warning ("Could not load icon: %s", e.message);
 		}
 
-		var app_name = new Gtk.Label(app["name"] + ".app");
+		var app_name = new Gtk.Label(app["name"]);
 		app_name.get_style_context().add_class ("app_name");
 
         var app_description = new Entry ();
