@@ -488,11 +488,12 @@ static int main (string[] args) {
     Gtk.Application app = new Gtk.Application ("dk.krishenriksen.spotlight", GLib.ApplicationFlags.FLAGS_NONE);
 
     // check for light or dark theme
-    File file = File.new_for_path (GLib.Environment.get_variable ("HOME") + "/.iraspbian-dark.twid");
+    File iraspbian = File.new_for_path (GLib.Environment.get_variable ("HOME") + "/.iraspbian-dark.twid");
+    File nighthawk = File.new_for_path (GLib.Environment.get_variable ("HOME") + "/.nighthawk.twid");
 
     string css_file = Config.PACKAGE_SHAREDIR +
         "/" + Config.PROJECT_NAME +
-        "/" + (file.query_exists() ? "spotlight_dark.css" : "spotlight.css");
+        "/" + (iraspbian.query_exists() || nighthawk.query_exists() ? "spotlight_dark.css" : "spotlight.css");
     var css_provider = new Gtk.CssProvider ();
 
     try {
