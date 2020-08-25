@@ -24,8 +24,6 @@ using Gtk;
 public class SpotlightWindow : Window {
     private Gdk.Rectangle monitor_dimensions;
 
-    private static string user_home = GLib.Environment.get_variable ("HOME");
-
     private Grid grid;
     private Box left_box;
     private Box right_box;
@@ -63,7 +61,7 @@ public class SpotlightWindow : Window {
         this.move(monitor_dimensions.width + width, 0);
 
         // Get all apps
-        LightPad.Backend.DesktopEntries.enumerate_apps (this.icons, 24, user_home, out this.apps);
+        LightPad.Backend.DesktopEntries.enumerate_apps (this.icons, 24, out this.apps);
         this.apps.sort ((a, b) => GLib.strcmp (a["name"], b["name"]));
 
         // search container
@@ -152,7 +150,8 @@ public class SpotlightWindow : Window {
 		this.filtered.add(null);
 
 	    foreach (Gee.HashMap<string, string> app in this.apps) {
-	        if ((app["name"] != null && current_text in app["name"].down ())) {
+	        if ((app["name"] != null && current_text in app["name"].down ()) ||
+	        	(app["command"] != null && current_text in app["command"].down ())) {
 
 	            this.filtered.add(app);
 
