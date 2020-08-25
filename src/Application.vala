@@ -39,6 +39,8 @@ public class SpotlightWindow : Window {
 
     private int current_item = 1;
 
+    private string calc_output;
+
     private Gee.ArrayList<Gee.HashMap<string, string>> apps = new Gee.ArrayList<Gee.HashMap<string, string>> ();
     private Gee.HashMap<string, Gdk.Pixbuf> icons = new Gee.HashMap<string, Gdk.Pixbuf>();
     private Gee.ArrayList<Gee.HashMap<string, string>> filtered = new Gee.ArrayList<Gee.HashMap<string, string>> ();
@@ -134,6 +136,8 @@ public class SpotlightWindow : Window {
 		}
 
 		this.filtered.clear();
+
+		this.calc_output = "";
 
 	    var current_text = this.search_entry.text.down();
 
@@ -320,20 +324,20 @@ public class SpotlightWindow : Window {
     	this.current_item = 1;
 
     	this.search_entry.text = "";
+
+    	this.calc_output = "";
     }
 
     private void calculate(string calc) {
 		var eval = new PantheonCalculator.Core.Evaluation ();
 
-		var output = "";
-
 		try {
-            output = eval.evaluate (this.search_entry.text, 0);
+            this.calc_output = eval.evaluate (this.search_entry.text, 0);
         } catch (PantheonCalculator.Core.OUT_ERROR e) {
         	warning ("Could not calculate: %s", e.message);
         }
 
-        if (output.length > 0) {
+        if (this.calc_output.length > 0) {
         	this.search_app_icon.set_from_icon_name("calculator", IconSize.DND);
 
 	        // left section
@@ -342,8 +346,11 @@ public class SpotlightWindow : Window {
 			appsbar.get_style_context().add_class("active");
 
 			var icon = new Gtk.Image.from_icon_name("calculator", IconSize.MENU);
-	    	var app_button = new Gtk.ToolButton(icon, output);
+	    	var app_button = new Gtk.ToolButton(icon, this.calc_output);
 	    	app_button.is_important = true;
+    		app_button.clicked.connect ( () => {
+    			this.copy_to_clipboard();
+    		});
 
 			appsbar.add(app_button);
 
@@ -361,7 +368,7 @@ public class SpotlightWindow : Window {
 
 			// add right side
 	        var app_to_add = new Gee.HashMap<string, string> ();
-	        app_to_add["name"] = output;
+	        app_to_add["name"] = this.calc_output;
 	        app_to_add["description"] = this.search_entry.text;
 	        app_to_add["command"] = "";
 	        app_to_add["desktop_file"] = "";
@@ -369,6 +376,13 @@ public class SpotlightWindow : Window {
 
 			this.rightSide(app_to_add);
         }
+    }
+
+    private void copy_to_clipboard() {
+		Gdk.Display display = Gdk.Display.get_default ();
+		Gtk.Clipboard clipboard = Gtk.Clipboard.get_for_display (display, Gdk.SELECTION_CLIPBOARD);
+
+		clipboard.set_text(this.calc_output, -1);
     }
 
     // Keyboard shortcuts
@@ -386,9 +400,15 @@ public class SpotlightWindow : Window {
             }
 
             case "Return": {
-                if (this.filtered.size >= 1) {
-                	this.launch(this.filtered.get(this.current_item));
-                }
+            	if (this.calc_output.length > 0) {
+            		this.copy_to_clipboard();
+            		this.destroy ();
+            	}
+            	else {
+                	if (this.filtered.size >= 1) {
+                		this.launch(this.filtered.get(this.current_item));
+                	}
+            	}
 
                 return true;
             }
