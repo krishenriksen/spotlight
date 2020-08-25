@@ -17,6 +17,7 @@
 * Boston, MA 02110-1301 USA
 *
 * Authored by: Juan Pablo Lozano <libredeb@gmail.com>
+* Modified by: Kris Henriksen <krishenriksen.work@gmail.com>
 */
 
 namespace LightPad.Backend {
@@ -130,16 +131,19 @@ namespace LightPad.Backend {
 	                    	enumerate_exe(list, directory + "/" + name);
 	                	}
 
-		                if (FileUtils.test (path, FileTest.IS_REGULAR) && FileUtils.test (path, FileTest.IS_EXECUTABLE)) {
-		                    var app_to_add = new Gee.HashMap<string, string> ();
-		                    app_to_add["name"] = name;
-		                    app_to_add["description"] = "Windows Executable";
-		                    app_to_add["terminal"] = "true";
-		                    app_to_add["command"] = path;
-		                    app_to_add["icon"] = "wine";
+	                	// only .exe files
+	                	if (name.rstr_len(name.length, ".").ascii_down() == ".exe") {
+			                if (FileUtils.test (path, FileTest.IS_REGULAR) && FileUtils.test (path, FileTest.IS_EXECUTABLE)) {
+			                	var app_to_add = new Gee.HashMap<string, string> ();
+			                    app_to_add["name"] = name;
+			                    app_to_add["description"] = "Windows Executable";
+			                    app_to_add["terminal"] = "true";
+			                    app_to_add["command"] = path;
+			                    app_to_add["icon"] = "wine";
 
-		                    list.add (app_to_add);
-		                }
+			                    list.add (app_to_add);
+			                }
+			            }
 	                }
 	            }
 	        } catch (FileError e) {
