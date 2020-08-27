@@ -111,44 +111,6 @@ namespace LightPad.Backend {
                     list.add (app_to_add);
                 }
             }
-
-            // search for exe files in Games and Applications folders
-            enumerate_exe(list, GLib.Environment.get_variable ("HOME") + "/Games");
-            enumerate_exe(list, GLib.Environment.get_variable ("HOME") + "/Applications");
         }
-
-	    public static void enumerate_exe (Gee.ArrayList<Gee.HashMap<string, string>> list, string directory) {
-	        try {
-	            Dir dir = Dir.open (directory, 0);
-	            string? name = null;
-
-	            while ((name = dir.read_name ()) != null) {
-	                string path = Path.build_filename (directory, name);
-
-	                // don't search hidden directories
-	                if (name.substring(0, 1) != ".") {
-						if (FileUtils.test (path, FileTest.IS_DIR)) {
-	                    	enumerate_exe(list, directory + "/" + name);
-	                	}
-
-	                	// only .exe files
-	                	if (name.rstr_len(name.length, ".").ascii_down() == ".exe") {
-			                if (FileUtils.test (path, FileTest.IS_REGULAR) && FileUtils.test (path, FileTest.IS_EXECUTABLE)) {
-			                	var app_to_add = new Gee.HashMap<string, string> ();
-			                    app_to_add["name"] = name;
-			                    app_to_add["description"] = "Windows Executable";
-			                    app_to_add["terminal"] = "true";
-			                    app_to_add["command"] = path;
-			                    app_to_add["icon"] = "wine";
-
-			                    list.add (app_to_add);
-			                }
-			            }
-	                }
-	            }
-	        } catch (FileError e) {
-	            warning(e.message);
-	        }
-	    }
     }
 }

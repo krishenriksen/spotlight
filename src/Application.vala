@@ -478,6 +478,8 @@ public class SpotlightWindow : Window {
 
     // Override destroy for fade out and stuff
     private new void destroy () {
+    	//base.hide_on_delete();
+
         base.destroy();
         Gtk.main_quit();
     }
@@ -505,7 +507,7 @@ static int main (string[] args) {
 
     app.activate.connect( () => {
         if (app.get_windows ().length () == 0) {
-            var main_window = new SpotlightWindow ();
+        	var main_window = new SpotlightWindow ();
             main_window.set_application (app);
             main_window.show();
             Gtk.main ();
