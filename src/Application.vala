@@ -72,7 +72,7 @@ public class SpotlightWindow : Window {
         this.search_entry = new Entry ();
         //search_entry.set_property("can-focus", false);
         this.search_entry.set_placeholder_text("Spotlight Search");
-		this.search_entry.set_icon_from_icon_name (Gtk.EntryIconPosition.PRIMARY, "edit-find-symbolic");
+		this.search_entry.set_icon_from_icon_name (Gtk.EntryIconPosition.PRIMARY, "edit-find");
 
         // seach app icon
 		this.search_app_icon = new Image();
@@ -149,6 +149,9 @@ public class SpotlightWindow : Window {
 
 		this.filtered.add(null);
 
+		// only show 6 results
+		int count = 0;
+
 	    foreach (Gee.HashMap<string, string> app in this.apps) {
 	        if ((app["name"] != null && current_text in app["name"].down ()) ||
 	        	(app["command"] != null && current_text in app["command"].down ())) {
@@ -156,24 +159,27 @@ public class SpotlightWindow : Window {
 	            this.filtered.add(app);
 
 	            // left section
-				var appsbar = new Toolbar ();
-				appsbar.get_style_context ().add_class("appsbar");
+	            if (count < 6) {
+					var appsbar = new Toolbar ();
+					appsbar.get_style_context ().add_class("appsbar");
 
-        		if (this.filtered.size == 2) {
-        			appsbar.get_style_context().add_class("active");
-        		}
+	        		if (this.filtered.size == 2) {
+	        			appsbar.get_style_context().add_class("active");
+	        		}
 
-				var icon = new Gtk.Image.from_icon_name(app["icon"], IconSize.MENU);
-		    	var app_button = new Gtk.ToolButton(icon, app["name"]);
-		    	app_button.is_important = true;
-    			app_button.clicked.connect ( () => {
-    				this.launch(app);
-    			});
+					var icon = new Gtk.Image.from_icon_name(app["icon"], IconSize.MENU);
+			    	var app_button = new Gtk.ToolButton(icon, app["name"]);
+			    	app_button.is_important = true;
+	    			app_button.clicked.connect ( () => {
+	    				this.launch(app);
+	    			});
 
-				appsbar.add(app_button);
+					appsbar.add(app_button);
 
-				this.left_box.add(appsbar);
+					this.left_box.add(appsbar);
+				}
 
+				count++;
 				
 	            if (this.filtered.size == 2) {
     				// add app icon to search_entry
@@ -315,16 +321,21 @@ public class SpotlightWindow : Window {
     }
 
     private void reset () {
-    	this.search_app_icon.set_from_icon_name(null, IconSize.DND);
-
-		this.search_box.get_style_context ().remove_class("searching");
-		this.grid.get_style_context ().remove_class("searching");
-
     	this.current_item = 1;
 
     	this.search_entry.text = "";
 
     	this.calc_output = "";
+
+		// clear grid
+		GLib.List<weak Gtk.Widget> children = this.grid.get_children ();
+		foreach (Gtk.Widget element in children) {
+			this.grid.remove(element);
+		}
+
+		this.search_box.get_style_context().remove_class("searching");
+		this.grid.get_style_context().remove_class("searching");
+		this.search_app_icon.set_from_icon_name(null, IconSize.DND);
     }
 
     private void calculate(string calc) {

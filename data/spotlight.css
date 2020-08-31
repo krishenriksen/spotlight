@@ -24,7 +24,9 @@
 	padding: 15px;
 	color: #a0a0a0;
 	background: rgba(240, 240, 240, 1);
+	border: 1px solid #d9d9d9;
 	border-radius: 8px;
+	box-shadow: 0px 15px 20px -25px rgba(0,0,0,0.75);
 }
 
 .spotlight .searching.search_box {
@@ -48,8 +50,7 @@
 	min-width: 32px;
 	min-height: 32px;
 	margin: 0 10px 0 0;
-	-gtk-icon-transform: scale(2);
-	-gtk-icon-style: symbolic;
+	-gtk-icon-transform: scale(1.5);
 }
 
 .spotlight .searching.search_box entry {
