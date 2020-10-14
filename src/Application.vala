@@ -149,7 +149,7 @@ public class SpotlightWindow : Window {
 
 		this.filtered.add(null);
 
-		// only show 6 results
+		// only show 8 results
 		int count = 0;
 
 	    foreach (Gee.HashMap<string, string> app in this.apps) {
@@ -159,7 +159,7 @@ public class SpotlightWindow : Window {
 	            this.filtered.add(app);
 
 	            // left section
-	            if (count < 6) {
+	            if (count < 8) {
 					var appsbar = new Toolbar ();
 					appsbar.get_style_context ().add_class("appsbar");
 
