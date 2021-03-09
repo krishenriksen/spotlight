@@ -503,10 +503,12 @@ static int main (string[] args) {
     // check for light or dark theme
     File iraspbian = File.new_for_path (GLib.Environment.get_variable ("HOME") + "/.iraspbian-dark.twid");
     File nighthawk = File.new_for_path (GLib.Environment.get_variable ("HOME") + "/.nighthawk.twid");
-
+    File twisteros = File.new_for_path (GLib.Environment.get_variable ("HOME") + "/.twisteros-dark.twid");
+    File iraspbiansur = File.new_for_path (GLib.Environment.get_variable ("HOME") + "/.iraspbiansur-dark.twid");    
+    
     string css_file = Config.PACKAGE_SHAREDIR +
         "/" + Config.PROJECT_NAME +
-        "/" + (iraspbian.query_exists() || nighthawk.query_exists() ? "spotlight_dark.css" : "spotlight.css");
+        "/" + (iraspbian.query_exists() || nighthawk.query_exists() || twisteros.query_exists() || iraspbiansur.query_exists() ? "spotlight_dark.css" : "spotlight.css");
     var css_provider = new Gtk.CssProvider ();
 
     try {
